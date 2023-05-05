@@ -15,24 +15,40 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html')
 })
 
-const players = {}
+const backendPlayers = {}
+
+// setInterval(() => {
+//   io.emit('updatePlayers', backendPlayers)
+// }, 2000)
 
 io.on('connection', (socket) => {
   console.log('a user connected')
-  players[socket.id] = {
+
+  const position = {
     x: 500 * Math.random(),
     y: 500 * Math.random()
   }
+  backendPlayers[socket.id] = position
 
-  io.emit('updatePlayers', players)
+  io.emit('connectAndDisconnectPlayers', backendPlayers)
+
+  socket.on('move', ({ position, id }) => {
+    console.log(backendPlayers[id])
+    if (!backendPlayers[id]) return
+    backendPlayers[id].x = position.x
+    backendPlayers[id].y = position.y
+
+    socket.broadcast.emit('updatePlayers', backendPlayers)
+  })
 
   socket.on('disconnect', (reason) => {
     console.log(reason)
-    delete players[socket.id]
-    io.emit('updatePlayers', players)
-  })
+    console.log({ backendPlayers })
+    if (!backendPlayers) return
 
-  console.log(players)
+    delete backendPlayers[socket.id]
+    io.emit('connectAndDisconnectPlayers', backendPlayers || {})
+  })
 })
 
 server.listen(port, () => {
