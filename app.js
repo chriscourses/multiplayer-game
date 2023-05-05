@@ -17,9 +17,9 @@ app.get('/', (req, res) => {
 
 const backendPlayers = {}
 
-// setInterval(() => {
-//   io.emit('updatePlayers', backendPlayers)
-// }, 2000)
+setInterval(() => {
+  socket.broadcast.emit('updatePlayers', backendPlayers)
+}, 60)
 
 io.on('connection', (socket) => {
   console.log('a user connected')
@@ -36,8 +36,6 @@ io.on('connection', (socket) => {
     if (!backendPlayers[id]) return
     backendPlayers[id].x = position.x
     backendPlayers[id].y = position.y
-
-    socket.broadcast.emit('updatePlayers', backendPlayers)
   })
 
   socket.on('disconnect', (reason) => {
