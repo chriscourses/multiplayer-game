@@ -33,7 +33,6 @@ io.on('connection', (socket) => {
   io.emit('connectAndDisconnectPlayers', backendPlayers)
 
   socket.on('move', ({ position, id }) => {
-    console.log(backendPlayers[id])
     if (!backendPlayers[id]) return
     backendPlayers[id].x = position.x
     backendPlayers[id].y = position.y
