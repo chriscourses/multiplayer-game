@@ -22,8 +22,10 @@ socket.on('updatePlayers', (backendPlayers) => {
   for (const id in backendPlayers) {
     if (id === yourPlayer.id) return
 
-    frontendPlayers[id].x = backendPlayers[id].x
-    frontendPlayers[id].y = backendPlayers[id].y
+    gsap.to(frontendPlayers[id], {
+      x: backendPlayers[id].x,
+      y: backendPlayers[id].y
+    })
   }
 })
 
