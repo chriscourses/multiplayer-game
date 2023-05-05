@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
 const backendPlayers = {}
 
 setInterval(() => {
-  socket.broadcast.emit('updatePlayers', backendPlayers)
+  io.emit('updatePlayers', backendPlayers)
 }, 60)
 
 io.on('connection', (socket) => {
