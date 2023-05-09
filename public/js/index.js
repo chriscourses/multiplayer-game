@@ -85,23 +85,55 @@ function animate() {
   }
 }
 
+const keys = {
+  a: {
+    pressed: false
+  },
+  s: {
+    pressed: false
+  },
+  d: {
+    pressed: false
+  },
+  w: {
+    pressed: false
+  }
+}
+
 addEventListener('keydown', (e) => {
-  const speed = 2
+  if (!yourPlayer) return
+
   switch (e.code) {
     case 'KeyA':
-      yourPlayer.velocity.x = -speed
+      // keys.a.pressed = true
+      yourPlayer.velocity.x -= 1
       break
     case 'KeyD':
-      yourPlayer.velocity.x = speed
-
+      yourPlayer.velocity.x += 1
       break
     case 'KeyS':
-      yourPlayer.velocity.y = speed
+      yourPlayer.velocity.y += 1
       break
     case 'KeyW':
-      yourPlayer.velocity.y = -speed
+      yourPlayer.velocity.y -= 1
       break
   }
 })
 
+addEventListener('keyup', (e) => {
+  switch (e.code) {
+    case 'KeyA':
+      keys.a.pressed = false
+      break
+    case 'KeyD':
+      keys.d.pressed = false
+      break
+    case 'KeyS':
+      keys.s.pressed = false
+      break
+    case 'KeyW':
+      keys.w.pressed = false
+      break
+  }
+})
 animate()

@@ -19,5 +19,8 @@ class Player {
     this.draw()
     this.x += this.velocity.x
     this.y += this.velocity.y
+
+    this.velocity.x *= 0.99
+    this.velocity.y *= 0.99
   }
 }
