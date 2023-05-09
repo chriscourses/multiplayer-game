@@ -26,6 +26,7 @@ socket.on('updatePlayers', (backendPlayers) => {
     if (animation) animation.kill()
 
     animation = gsap.to(frontendPlayers[id], {
+      duration: 0.1,
       x: backendPlayers[id].x,
       y: backendPlayers[id].y
     })
