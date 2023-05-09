@@ -19,7 +19,7 @@ const backendPlayers = {}
 
 setInterval(() => {
   io.emit('updatePlayers', backendPlayers)
-}, 16)
+}, 30)
 
 io.on('connection', (socket) => {
   console.log('a user connected')

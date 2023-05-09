@@ -18,11 +18,14 @@ socket.on('connect', () => {
   console.log(socket.id)
 })
 
+let animation
 socket.on('updatePlayers', (backendPlayers) => {
   for (const id in backendPlayers) {
     if (id === yourPlayer.id) return
 
-    gsap.to(frontendPlayers[id], {
+    if (animation) animation.kill()
+
+    animation = gsap.to(frontendPlayers[id], {
       x: backendPlayers[id].x,
       y: backendPlayers[id].y
     })
@@ -60,6 +63,15 @@ socket.on('connectAndDisconnectPlayers', (backendPlayers) => {
 
 // update players
 
+setInterval(() => {
+  if (yourPlayer) {
+    socket.emit('move', {
+      position: { x: yourPlayer.x, y: yourPlayer.y },
+      id: yourPlayer.id
+    })
+  }
+}, 30)
+
 let animationId
 function animate() {
   animationId = requestAnimationFrame(animate)
@@ -69,15 +81,6 @@ function animate() {
   for (const id in frontendPlayers) {
     const frontendPlayer = frontendPlayers[id]
     frontendPlayer.update()
-  }
-
-  if (yourPlayer) {
-    console.log({ yourPlayer })
-
-    socket.emit('move', {
-      position: { x: yourPlayer.x, y: yourPlayer.y },
-      id: yourPlayer.id
-    })
   }
 }
 
