@@ -53,7 +53,8 @@ io.on('connection', (socket) => {
       color: `hsl(${360 * Math.random()}, 100%, 50%)`,
       sequenceNumber: 0,
       score: 0,
-      username
+      radius:RADIUS,
+      username,
     }
 
     // where we init our canvas
