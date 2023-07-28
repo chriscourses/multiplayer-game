@@ -15,6 +15,7 @@ const y = canvas.height / 2
 
 const frontEndPlayers = {}
 const frontEndProjectiles = {}
+const frontEndPortions = {}
 
 socket.on('updateProjectiles', (backEndProjectiles) => {
   for (const id in backEndProjectiles) {
@@ -24,7 +25,7 @@ socket.on('updateProjectiles', (backEndProjectiles) => {
       frontEndProjectiles[id] = new Projectile({
         x: backEndProjectile.x,
         y: backEndProjectile.y,
-        radius: 5,
+        radius: backEndProjectile.radius,
         color: frontEndPlayers[backEndProjectile.playerId]?.color,
         velocity: backEndProjectile.velocity
       })
@@ -41,9 +42,50 @@ socket.on('updateProjectiles', (backEndProjectiles) => {
   }
 })
 
+socket.on('updatePortions', (backEndPortions) => {
+  for (const id in backEndPortions) {
+    const backEndPortion = backEndPortions[id]
+
+    if (!frontEndPortions[id]) {
+      frontEndPortions[id] = new Portion({
+        x: backEndPortion.x,
+        y: backEndPortion.y,
+        effect: backEndPortion.effect
+      })
+    }
+
+  }
+
+  for (const id in frontEndPortions) {
+    if (!backEndPortions[id]) {
+      if (!backEndPortions[id]) {
+        delete frontEndPortions[id]
+      }
+    }
+  }
+})
+
 socket.on('updatePlayers', (backEndPlayers) => {
   for (const id in backEndPlayers) {
     const backEndPlayer = backEndPlayers[id]
+
+    if(frontEndPlayers[id]){
+      if (frontEndPlayers[id].radius != backEndPlayer.radius) {
+        frontEndPlayers[id].updateRadius(backEndPlayer.radius)
+      }
+    }
+
+    if(backEndPlayer.effect){
+      const portionDiv = document.querySelector('#portionEffects')
+      if(backEndPlayer.effectTime < 15){
+        portionDiv.innerHTML = ''
+      }
+      else{
+        portionDiv.innerHTML = `<div data-id="${id}">${backEndPlayer.effect}: ${backEndPlayer.effectTime}</div>`
+      }
+      
+    }
+    
 
     if (!frontEndPlayers[id]) {
       frontEndPlayers[id] = new Player({
@@ -52,6 +94,8 @@ socket.on('updatePlayers', (backEndPlayers) => {
         radius: backEndPlayer.radius,
         color: backEndPlayer.color
       })
+
+      
 
       document.querySelector(
         '#playerLabels'
@@ -139,6 +183,11 @@ function animate() {
   for (const id in frontEndPlayers) {
     const frontEndPlayer = frontEndPlayers[id]
     frontEndPlayer.draw()
+  }
+
+  for (const id in frontEndPortions) {
+    const frontEndPortion = frontEndPortions[id]
+    frontEndPortion.draw()
   }
 
   for (const id in frontEndProjectiles) {

@@ -17,11 +17,19 @@ app.get('/', (req, res) => {
 
 const backEndPlayers = {}
 const backEndProjectiles = {}
+const backEndPortions = {}
 
 const SPEED = 10
-const RADIUS = 10
+const RADIUS = 20
 const PROJECTILE_RADIUS = 5
+const PROJECTILE_SPEED = 50
+const PORTION_SPWAN_TIME = 1000
+const EFFECT_TIME = 10000
+//const EFFECTS = ['GROW', 'FLASH', 'BIG_BULLETS', 'SHINK', 'FAST_BULLETS', 'SLOW_BULLETS']
+const EFFECTS = ['GROW', 'SHINK']
 let projectileId = 0
+let count = 0
+
 
 io.on('connection', (socket) => {
   console.log('a user connected')
@@ -32,28 +40,31 @@ io.on('connection', (socket) => {
     projectileId++
 
     const velocity = {
-      x: Math.cos(angle) * 5,
-      y: Math.sin(angle) * 5
+      x: Math.cos(angle) * PROJECTILE_SPEED,
+      y: Math.sin(angle) * PROJECTILE_SPEED
     }
 
     backEndProjectiles[projectileId] = {
       x,
       y,
       velocity,
-      playerId: socket.id
+      playerId: socket.id,
+      radius:PROJECTILE_RADIUS
     }
 
-    console.log(backEndProjectiles)
+    //console.log(backEndProjectiles)
   })
 
   socket.on('initGame', ({ username, width, height, devicePixelRatio }) => {
     backEndPlayers[socket.id] = {
-      x: 500 * Math.random(),
-      y: 500 * Math.random(),
+      x: 500 * Math.random()+500,
+      y: 500 * Math.random()+500,
       color: `hsl(${360 * Math.random()}, 100%, 50%)`,
       sequenceNumber: 0,
       score: 0,
       radius:RADIUS,
+      effect:'',
+      effectTime:-1,
       username,
     }
 
@@ -98,14 +109,71 @@ io.on('connection', (socket) => {
   })
 })
 
+
 // backend ticker
-setInterval(() => {
+setInterval((radius=PROJECTILE_RADIUS) => {
+  if (count == PORTION_SPWAN_TIME){
+    backEndPortions[1000*Math.random()] = {
+      x: 500 * Math.random(),
+      y: 500 * Math.random(),
+      effect:EFFECTS[(Math.floor(Math.random() * EFFECTS.length))]
+    }
+    console.log(backEndPortions)
+    count = 0
+  }
+  count++
+  
+
+  // Collision of player with portions
+  for (const playerId in backEndPlayers){
+    const backEndPlayer = backEndPlayers[playerId]
+
+    if (backEndPlayer.effectTime > 0){
+      backEndPlayer.effectTime -= 15
+    }
+
+    if (backEndPlayer.effectTime < 0){
+      backEndPlayer.effectTime = -1
+      if(backEndPlayer.effect == 'GROW'){
+        backEndPlayer.radius = 20
+        backEndPlayer.effect = ''
+      }
+      if(backEndPlayer.effect == 'SHINK'){
+        backEndPlayer.radius = 20
+        backEndPlayer.effect = ''
+      }
+    }
+
+    for (const id in backEndPortions){
+      const backEndPortion = backEndPortions[id]
+
+      if (backEndPlayer.x - backEndPortion.x < 15 && backEndPlayer.y - backEndPortion.y < 15 && backEndPlayer.effect == ''){
+        const effect = backEndPortion.effect
+        if(effect == 'GROW'){
+          backEndPlayer.radius = 30
+          backEndPlayer.effect = effect
+          backEndPlayer.effectTime = EFFECT_TIME
+          delete backEndPortions[id]
+        }
+        if(effect == 'SHINK'){
+          backEndPlayer.radius = 10
+          backEndPlayer.effect = effect
+          backEndPlayer.effectTime = EFFECT_TIME
+          delete backEndPortions[id]
+        }
+        
+      }
+    }
+  }
+  
+
+
   // update projectile positions
   for (const id in backEndProjectiles) {
     backEndProjectiles[id].x += backEndProjectiles[id].velocity.x
     backEndProjectiles[id].y += backEndProjectiles[id].velocity.y
 
-    const PROJECTILE_RADIUS = 5
+    const PROJECTILE_RADIUS = radius
     if (
       backEndProjectiles[id].x - PROJECTILE_RADIUS >=
         backEndPlayers[backEndProjectiles[id].playerId]?.canvas?.width ||
@@ -139,11 +207,14 @@ setInterval(() => {
         delete backEndPlayers[playerId]
         break
       }
+
+      
     }
   }
 
   io.emit('updateProjectiles', backEndProjectiles)
   io.emit('updatePlayers', backEndPlayers)
+  io.emit('updatePortions', backEndPortions)
 }, 15)
 
 server.listen(port, () => {

@@ -19,4 +19,8 @@ class Player {
     c.fillStyle = this.color
     c.fill()
   }
+
+  updateRadius(radius){
+    this.radius = radius
+  }
 }
