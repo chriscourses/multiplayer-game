@@ -16,7 +16,7 @@ class Portion {
             case 'BIG_BULLETS':
               c.fillStyle = 'orange';
               break;
-            case 'SHINK':
+            case 'SHRINK':
               c.fillStyle = 'green';
               break;
             case 'FAST_BULLETS':
@@ -24,6 +24,9 @@ class Portion {
               break;
             case 'SLOW_BULLETS':
               c.fillStyle = 'blue';
+              break;
+            case 'SLOW':
+              c.fillStyle = 'pink';
               break;
             default:
               // Set a default color or do nothing if none of the cases match

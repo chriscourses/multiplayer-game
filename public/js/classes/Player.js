@@ -1,11 +1,14 @@
 class Player {
-  constructor({ x, y, radius, color }) {
+  constructor({ x, y, radius, color, speed, projectileRadius, projectileSpeed }) {
     this.x = x
     this.y = y
     this.radius = radius
     this.color = color
+    this.speed = speed
     this.effect = ''
     this.effectTime = -1
+    this.projectileRadius = projectileRadius
+    this.projectileSpeed = projectileSpeed
   }
 
   draw() {

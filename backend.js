@@ -21,12 +21,12 @@ const backEndPortions = {}
 
 const SPEED = 10
 const RADIUS = 20
-const PROJECTILE_RADIUS = 5
-const PROJECTILE_SPEED = 50
+const PROJECTILE_RADIUS = 10
+const PROJECTILE_SPEED = 30
 const PORTION_SPWAN_TIME = 1000
 const EFFECT_TIME = 10000
-//const EFFECTS = ['GROW', 'FLASH', 'BIG_BULLETS', 'SHINK', 'FAST_BULLETS', 'SLOW_BULLETS']
-const EFFECTS = ['GROW', 'SHINK']
+//const EFFECTS = ['GROW', 'FLASH', 'BIG_BULLETS', 'SHRINK', 'FAST_BULLETS', 'SLOW_BULLETS', 'SLOW']
+const EFFECTS = ['GROW', 'SHRINK', 'FLASH', 'SLOW', 'BIG_BULLETS', 'FAST_BULLETS']
 let projectileId = 0
 let count = 0
 let protionId = 0
@@ -41,8 +41,8 @@ io.on('connection', (socket) => {
     projectileId++
 
     const velocity = {
-      x: Math.cos(angle) * PROJECTILE_SPEED,
-      y: Math.sin(angle) * PROJECTILE_SPEED
+      x: Math.cos(angle) * backEndPlayers[socket.id].projectileSpeed,
+      y: Math.sin(angle) * backEndPlayers[socket.id].projectileSpeed
     }
 
     backEndProjectiles[projectileId] = {
@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
       y,
       velocity,
       playerId: socket.id,
-      radius:PROJECTILE_RADIUS
+      radius:backEndPlayers[socket.id].projectileRadius
     }
 
     //console.log(backEndProjectiles)
@@ -64,6 +64,9 @@ io.on('connection', (socket) => {
       sequenceNumber: 0,
       score: 0,
       radius:RADIUS,
+      speed:SPEED,
+      projectileRadius:PROJECTILE_RADIUS,
+      projectileSpeed:PROJECTILE_SPEED,
       effect:'',
       effectTime:-1,
       username,
@@ -92,19 +95,19 @@ io.on('connection', (socket) => {
     backEndPlayers[socket.id].sequenceNumber = sequenceNumber
     switch (keycode) {
       case 'KeyW':
-        backEndPlayers[socket.id].y -= SPEED
+        backEndPlayers[socket.id].y -= backEndPlayers[socket.id].speed
         break
 
       case 'KeyA':
-        backEndPlayers[socket.id].x -= SPEED
+        backEndPlayers[socket.id].x -= backEndPlayers[socket.id].speed
         break
 
       case 'KeyS':
-        backEndPlayers[socket.id].y += SPEED
+        backEndPlayers[socket.id].y += backEndPlayers[socket.id].speed
         break
 
       case 'KeyD':
-        backEndPlayers[socket.id].x += SPEED
+        backEndPlayers[socket.id].x += backEndPlayers[socket.id].speed
         break
     }
   })
@@ -126,39 +129,82 @@ setInterval((radius=PROJECTILE_RADIUS) => {
   count++
   
 
-  // Collision of player with portions
+  // Portions Effects Applications
   for (const playerId in backEndPlayers){
     const backEndPlayer = backEndPlayers[playerId]
-
+    // This Restrict player from taking more portions
     if (backEndPlayer.effectTime > 0){
       backEndPlayer.effectTime -= 15
     }
 
+    // Restoring the portions effect
     if (backEndPlayer.effectTime < 0){
-      backEndPlayer.effectTime = -1
+      
       if(backEndPlayer.effect == 'GROW'){
-        backEndPlayer.radius = 20
-        backEndPlayer.effect = ''
+        backEndPlayer.radius = RADIUS
       }
-      if(backEndPlayer.effect == 'SHINK'){
-        backEndPlayer.radius = 20
-        backEndPlayer.effect = ''
+      if(backEndPlayer.effect == 'SHRINK'){
+        backEndPlayer.radius = RADIUS
       }
+      if(backEndPlayer.effect == 'FLASH'){
+        backEndPlayer.speed = SPEED
+      }
+      if(backEndPlayer.effect == 'SLOW'){
+        backEndPlayer.speed = SPEED
+      }
+      if(backEndPlayer.effect == 'BIG_BULLETS'){
+        backEndPlayer.projectileRadius = PROJECTILE_RADIUS
+        backEndPlayer.projectileSpeed = PROJECTILE_SPEED
+      }
+      if(backEndPlayer.effect == 'FAST_BULLETS'){
+        backEndPlayer.projectileRadius = PROJECTILE_RADIUS
+        backEndPlayer.projectileSpeed = PROJECTILE_SPEED
+      }
+
+      backEndPlayer.effect = ''
+      backEndPlayer.effectTime = -1
     }
 
+    // Collision of player with portions
     for (const id in backEndPortions){
       const backEndPortion = backEndPortions[id]
 
-      if (backEndPlayer.x - backEndPortion.x < 15 && backEndPlayer.y - backEndPortion.y < 15 && backEndPlayer.effect == ''){
+      if (Math.abs(backEndPlayer.x - backEndPortion.x) < 15 && Math.abs(backEndPlayer.y - backEndPortion.y) < 15 && backEndPlayer.effect == ''){
         const effect = backEndPortion.effect
         if(effect == 'GROW'){
-          backEndPlayer.radius = 30
+          backEndPlayer.radius = RADIUS + 10
           backEndPlayer.effect = effect
           backEndPlayer.effectTime = EFFECT_TIME
           delete backEndPortions[id]
         }
-        if(effect == 'SHINK'){
-          backEndPlayer.radius = 10
+        if(effect == 'SHRINK'){
+          backEndPlayer.radius = RADIUS - 10
+          backEndPlayer.effect = effect
+          backEndPlayer.effectTime = EFFECT_TIME
+          delete backEndPortions[id]
+        }
+        if(effect == 'FLASH'){
+          backEndPlayer.speed = SPEED + 5
+          backEndPlayer.effect = effect
+          backEndPlayer.effectTime = EFFECT_TIME
+          delete backEndPortions[id]
+        }
+        if(effect == 'SLOW'){
+          backEndPlayer.speed = SPEED - 5
+          backEndPlayer.effect = effect
+          backEndPlayer.effectTime = EFFECT_TIME
+          delete backEndPortions[id]
+        }
+        if(effect == 'BIG_BULLETS'){
+          backEndPlayer.projectileRadius = PROJECTILE_RADIUS + 5
+          backEndPlayer.projectileSpeed = PROJECTILE_SPEED - 10
+          backEndPlayer.effect = effect
+          backEndPlayer.effectTime = EFFECT_TIME
+          delete backEndPortions[id]
+        }
+        if(effect == 'FAST_BULLETS'){
+          backEndPlayer.projectileRadius = PROJECTILE_RADIUS - 5
+          backEndPlayer.projectileSpeed = PROJECTILE_SPEED + 10
           backEndPlayer.effect = effect
           backEndPlayer.effectTime = EFFECT_TIME
           delete backEndPortions[id]

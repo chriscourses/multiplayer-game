@@ -72,6 +72,9 @@ socket.on('updatePlayers', (backEndPlayers) => {
     if(frontEndPlayers[id]){
       frontEndPlayers[id].radius = backEndPlayer.radius
       frontEndPlayers[id].updateEffect(backEndPlayer.effect, backEndPlayer.effectTime)
+      frontEndPlayers[id].speed = backEndPlayer.speed
+      frontEndPlayers[id].projectileRadius = backEndPlayer.projectileRadius
+      frontEndPlayers[id].projectileSpeed = backEndPlayer.projectileSpeed
     }
     
 
@@ -80,7 +83,10 @@ socket.on('updatePlayers', (backEndPlayers) => {
         x: backEndPlayer.x,
         y: backEndPlayer.y,
         radius: backEndPlayer.radius,
-        color: backEndPlayer.color
+        color: backEndPlayer.color,
+        speed: backEndPlayer.speed,
+        projectileRadius: backEndPlayer.projectileRadius,
+        projectileSpeed: backEndPlayer.projectileSpeed,
       })
 
       
@@ -206,36 +212,36 @@ const keys = {
   }
 }
 
-const SPEED = 10
+
 const playerInputs = []
 let sequenceNumber = 0
 setInterval(() => {
   // Used to detect the key presses
   if (keys.w.pressed) {
     sequenceNumber++
-    playerInputs.push({ sequenceNumber, dx: 0, dy: -SPEED })
-    frontEndPlayers[socket.id].y -= SPEED
+    playerInputs.push({ sequenceNumber, dx: 0, dy: -frontEndPlayers[socket.id].speed })
+    frontEndPlayers[socket.id].y -= frontEndPlayers[socket.id].speed
     socket.emit('keydown', { keycode: 'KeyW', sequenceNumber })
   }
 
   if (keys.a.pressed) {
     sequenceNumber++
-    playerInputs.push({ sequenceNumber, dx: -SPEED, dy: 0 })
-    frontEndPlayers[socket.id].x -= SPEED
+    playerInputs.push({ sequenceNumber, dx: -frontEndPlayers[socket.id].speed, dy: 0 })
+    frontEndPlayers[socket.id].x -= frontEndPlayers[socket.id].speed
     socket.emit('keydown', { keycode: 'KeyA', sequenceNumber })
   }
 
   if (keys.s.pressed) {
     sequenceNumber++
-    playerInputs.push({ sequenceNumber, dx: 0, dy: SPEED })
-    frontEndPlayers[socket.id].y += SPEED
+    playerInputs.push({ sequenceNumber, dx: 0, dy: frontEndPlayers[socket.id].speed })
+    frontEndPlayers[socket.id].y += frontEndPlayers[socket.id].speed
     socket.emit('keydown', { keycode: 'KeyS', sequenceNumber })
   }
 
   if (keys.d.pressed) {
     sequenceNumber++
-    playerInputs.push({ sequenceNumber, dx: SPEED, dy: 0 })
-    frontEndPlayers[socket.id].x += SPEED
+    playerInputs.push({ sequenceNumber, dx: frontEndPlayers[socket.id].speed, dy: 0 })
+    frontEndPlayers[socket.id].x += frontEndPlayers[socket.id].speed
     socket.emit('keydown', { keycode: 'KeyD', sequenceNumber })
   }
 
