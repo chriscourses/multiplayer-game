@@ -4,6 +4,8 @@ class Player {
     this.y = y
     this.radius = radius
     this.color = color
+    this.effect = ''
+    this.effectTime = -1
   }
 
   draw() {
@@ -22,5 +24,10 @@ class Player {
 
   updateRadius(radius){
     this.radius = radius
+  }
+
+  updateEffect(effect, effectTime){
+    this.effect = effect
+    this.effectTime = effectTime
   }
 }

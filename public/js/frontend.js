@@ -70,20 +70,8 @@ socket.on('updatePlayers', (backEndPlayers) => {
     const backEndPlayer = backEndPlayers[id]
 
     if(frontEndPlayers[id]){
-      if (frontEndPlayers[id].radius != backEndPlayer.radius) {
-        frontEndPlayers[id].updateRadius(backEndPlayer.radius)
-      }
-    }
-
-    if(backEndPlayer.effect){
-      const portionDiv = document.querySelector('#portionEffects')
-      if(backEndPlayer.effectTime < 15){
-        portionDiv.innerHTML = ''
-      }
-      else{
-        portionDiv.innerHTML = `<div data-id="${id}">${backEndPlayer.effect}: ${backEndPlayer.effectTime}</div>`
-      }
-      
+      frontEndPlayers[id].radius = backEndPlayer.radius
+      frontEndPlayers[id].updateEffect(backEndPlayer.effect, backEndPlayer.effectTime)
     }
     
 
@@ -222,6 +210,7 @@ const SPEED = 10
 const playerInputs = []
 let sequenceNumber = 0
 setInterval(() => {
+  // Used to detect the key presses
   if (keys.w.pressed) {
     sequenceNumber++
     playerInputs.push({ sequenceNumber, dx: 0, dy: -SPEED })
@@ -248,6 +237,18 @@ setInterval(() => {
     playerInputs.push({ sequenceNumber, dx: SPEED, dy: 0 })
     frontEndPlayers[socket.id].x += SPEED
     socket.emit('keydown', { keycode: 'KeyD', sequenceNumber })
+  }
+
+  // Use to the portions effect to the client
+  if(frontEndPlayers[socket.id].effect){
+    const portionDiv = document.querySelector('#portionEffects')
+    if(frontEndPlayers[socket.id].effectTime < 500){
+      portionDiv.innerHTML = ''
+    }
+    else{
+      portionDiv.innerHTML = `<div data-id="${socket.id}">${frontEndPlayers[socket.id].effect}: ${frontEndPlayers[socket.id].effectTime}</div>`
+    }
+    
   }
 }, 15)
 

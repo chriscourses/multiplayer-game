@@ -29,6 +29,7 @@ const EFFECT_TIME = 10000
 const EFFECTS = ['GROW', 'SHINK']
 let projectileId = 0
 let count = 0
+let protionId = 0
 
 
 io.on('connection', (socket) => {
@@ -113,7 +114,8 @@ io.on('connection', (socket) => {
 // backend ticker
 setInterval((radius=PROJECTILE_RADIUS) => {
   if (count == PORTION_SPWAN_TIME){
-    backEndPortions[1000*Math.random()] = {
+    protionId+=1
+    backEndPortions[protionId] = {
       x: 500 * Math.random(),
       y: 500 * Math.random(),
       effect:EFFECTS[(Math.floor(Math.random() * EFFECTS.length))]
