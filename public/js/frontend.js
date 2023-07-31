@@ -7,8 +7,10 @@ const scoreEl = document.querySelector('#scoreEl')
 
 const devicePixelRatio = window.devicePixelRatio || 1
 
-canvas.width = innerWidth * devicePixelRatio
-canvas.height = innerHeight * devicePixelRatio
+canvas.width = 1024 * devicePixelRatio
+canvas.height = 576 * devicePixelRatio
+
+c.scale(devicePixelRatio, devicePixelRatio)
 
 const x = canvas.width / 2
 const y = canvas.height / 2
@@ -50,7 +52,8 @@ socket.on('updatePlayers', (backEndPlayers) => {
         x: backEndPlayer.x,
         y: backEndPlayer.y,
         radius: 10,
-        color: backEndPlayer.color
+        color: backEndPlayer.color,
+        username: backEndPlayer.username
       })
 
       document.querySelector(
@@ -133,8 +136,8 @@ socket.on('updatePlayers', (backEndPlayers) => {
 let animationId
 function animate() {
   animationId = requestAnimationFrame(animate)
-  c.fillStyle = 'rgba(0, 0, 0, 0.1)'
-  c.fillRect(0, 0, canvas.width, canvas.height)
+  // c.fillStyle = 'rgba(0, 0, 0, 0.1)'
+  c.clearRect(0, 0, canvas.width, canvas.height)
 
   for (const id in frontEndPlayers) {
     const frontEndPlayer = frontEndPlayers[id]
