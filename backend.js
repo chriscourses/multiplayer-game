@@ -140,8 +140,8 @@ setInterval((radius=PROJECTILE_RADIUS) => {
   if (count == PORTION_SPWAN_TIME){
     protionId+=1
     backEndPortions[protionId] = {
-      x: 500 * Math.random(),
-      y: 500 * Math.random(),
+      x: 1024 * Math.random(),
+      y: 576 * Math.random(),
       effect:EFFECTS[(Math.floor(Math.random() * EFFECTS.length))]
     }
     console.log(backEndPortions)
