@@ -19,6 +19,7 @@ const backEndPlayers = {}
 const backEndProjectiles = {}
 const backEndPortions = {}
 
+
 const SPEED = 10
 const RADIUS = 20
 const PROJECTILE_RADIUS = 10
@@ -27,6 +28,7 @@ const PORTION_SPWAN_TIME = 1000
 const EFFECT_TIME = 10000
 //const EFFECTS = ['GROW', 'FLASH', 'BIG_BULLETS', 'SHRINK', 'FAST_BULLETS', 'SLOW_BULLETS', 'SLOW']
 const EFFECTS = ['GROW', 'SHRINK', 'FLASH', 'SLOW', 'BIG_BULLETS', 'FAST_BULLETS']
+
 let projectileId = 0
 let count = 0
 let protionId = 0
@@ -56,10 +58,12 @@ io.on('connection', (socket) => {
     //console.log(backEndProjectiles)
   })
 
-  socket.on('initGame', ({ username, width, height, devicePixelRatio }) => {
+  socket.on('initGame', ({ username, width, height }) => {
     backEndPlayers[socket.id] = {
-      x: 500 * Math.random()+500,
-      y: 500 * Math.random()+500,
+
+      x: 1024 * Math.random(),
+      y: 576 * Math.random(),
+
       color: `hsl(${360 * Math.random()}, 100%, 50%)`,
       sequenceNumber: 0,
       score: 0,
@@ -79,10 +83,6 @@ io.on('connection', (socket) => {
     }
 
     backEndPlayers[socket.id].radius = RADIUS
-
-    if (devicePixelRatio > 1) {
-      backEndPlayers[socket.id].radius = 2 * RADIUS
-    }
   })
 
   socket.on('disconnect', (reason) => {
@@ -92,6 +92,10 @@ io.on('connection', (socket) => {
   })
 
   socket.on('keydown', ({ keycode, sequenceNumber }) => {
+    const backEndPlayer = backEndPlayers[socket.id]
+
+    if (!backEndPlayers[socket.id]) return
+
     backEndPlayers[socket.id].sequenceNumber = sequenceNumber
     switch (keycode) {
       case 'KeyW':
@@ -110,6 +114,23 @@ io.on('connection', (socket) => {
         backEndPlayers[socket.id].x += backEndPlayers[socket.id].speed
         break
     }
+
+    const playerSides = {
+      left: backEndPlayer.x - backEndPlayer.radius,
+      right: backEndPlayer.x + backEndPlayer.radius,
+      top: backEndPlayer.y - backEndPlayer.radius,
+      bottom: backEndPlayer.y + backEndPlayer.radius
+    }
+
+    if (playerSides.left < 0) backEndPlayers[socket.id].x = backEndPlayer.radius
+
+    if (playerSides.right > 1024)
+      backEndPlayers[socket.id].x = 1024 - backEndPlayer.radius
+
+    if (playerSides.top < 0) backEndPlayers[socket.id].y = backEndPlayer.radius
+
+    if (playerSides.bottom > 576)
+      backEndPlayers[socket.id].y = 576 - backEndPlayer.radius
   })
 })
 
