@@ -71,14 +71,17 @@ socket.on('updatePlayers', (backEndPlayers) => {
   for (const id in backEndPlayers) {
     const backEndPlayer = backEndPlayers[id]
 
-    if(frontEndPlayers[id]){
+    if (frontEndPlayers[id]) {
       frontEndPlayers[id].radius = backEndPlayer.radius
       frontEndPlayers[id].updateEffect(backEndPlayer.effect, backEndPlayer.effectTime)
       frontEndPlayers[id].speed = backEndPlayer.speed
       frontEndPlayers[id].projectileRadius = backEndPlayer.projectileRadius
-      frontEndPlayers[id].projectileSpeed = backEndPlayer.projectileSpeed
+      frontEndPlayers[id].projectileSpeed = backEndPlayer.projectileSpeed,
+      frontEndPlayers[id].health = backEndPlayer.health,
+      frontEndPlayers[id].healthBar = backEndPlayer.healthBar,
+      frontEndPlayers[id].projectileDamage = backEndPlayer.projectileDamage
     }
-    
+
 
     if (!frontEndPlayers[id]) {
       frontEndPlayers[id] = new Player({
@@ -89,11 +92,13 @@ socket.on('updatePlayers', (backEndPlayers) => {
         speed: backEndPlayer.speed,
         projectileRadius: backEndPlayer.projectileRadius,
         projectileSpeed: backEndPlayer.projectileSpeed,
-        username: backEndPlayer.username
-
+        username: backEndPlayer.username,
+        health: backEndPlayer.health,
+        healthBar: backEndPlayer.healthBar,
+        projectileDamage: backEndPlayer.projectileDamage,
       })
 
-      
+
 
       document.querySelector(
         '#playerLabels'
@@ -255,15 +260,15 @@ setInterval(() => {
   }
 
   // Use to the portions effect to the client
-  if(frontEndPlayers[socket.id].effect){
+  if (frontEndPlayers[socket.id].effect) {
     const portionDiv = document.querySelector('#portionEffects')
-    if(frontEndPlayers[socket.id].effectTime < 500){
+    if (frontEndPlayers[socket.id].effectTime < 500) {
       portionDiv.innerHTML = ''
     }
-    else{
+    else {
       portionDiv.innerHTML = `<div data-id="${socket.id}">${frontEndPlayers[socket.id].effect}: ${frontEndPlayers[socket.id].effectTime}</div>`
     }
-    
+
   }
 }, 15)
 

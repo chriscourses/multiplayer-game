@@ -19,9 +19,11 @@ const backEndPlayers = {}
 const backEndProjectiles = {}
 const backEndPortions = {}
 
-
+const HEALTH = 50
+const HEALTHBAR = 50
 const SPEED = 10
 const RADIUS = 20
+const PROJECTILE_DAMAGE = 10
 const PROJECTILE_RADIUS = 10
 const PROJECTILE_SPEED = 30
 const PORTION_SPWAN_TIME = 1000
@@ -52,7 +54,8 @@ io.on('connection', (socket) => {
       y,
       velocity,
       playerId: socket.id,
-      radius:backEndPlayers[socket.id].projectileRadius
+      radius:backEndPlayers[socket.id].projectileRadius,
+      damage: backEndPlayers[socket.id].projectileDamage
     }
 
     //console.log(backEndProjectiles)
@@ -71,6 +74,9 @@ io.on('connection', (socket) => {
       speed:SPEED,
       projectileRadius:PROJECTILE_RADIUS,
       projectileSpeed:PROJECTILE_SPEED,
+      health:HEALTH,
+      healthBar:HEALTHBAR,
+      projectileDamage:PROJECTILE_DAMAGE,
       effect:'',
       effectTime:-1,
       username,
@@ -242,7 +248,7 @@ setInterval((radius=PROJECTILE_RADIUS) => {
     backEndProjectiles[id].x += backEndProjectiles[id].velocity.x
     backEndProjectiles[id].y += backEndProjectiles[id].velocity.y
 
-    const PROJECTILE_RADIUS = radius
+    const PROJECTILE_RADIUS = backEndProjectiles[id].radius
     if (
       backEndProjectiles[id].x - PROJECTILE_RADIUS >=
         backEndPlayers[backEndProjectiles[id].playerId]?.canvas?.width ||
@@ -266,7 +272,7 @@ setInterval((radius=PROJECTILE_RADIUS) => {
       // collision detection
       if (
         DISTANCE < PROJECTILE_RADIUS + backEndPlayer.radius &&
-        backEndProjectiles[id].playerId !== playerId
+        backEndProjectiles[id].playerId !== playerId && backEndPlayer.health <= 0
       ) {
         if (backEndPlayers[backEndProjectiles[id].playerId])
           backEndPlayers[backEndProjectiles[id].playerId].score++
@@ -274,6 +280,14 @@ setInterval((radius=PROJECTILE_RADIUS) => {
         console.log(backEndPlayers[backEndProjectiles[id].playerId])
         delete backEndProjectiles[id]
         delete backEndPlayers[playerId]
+        break
+      }
+      if (
+        DISTANCE < PROJECTILE_RADIUS + backEndPlayer.radius &&
+        backEndProjectiles[id].playerId !== playerId && backEndPlayer.health > 0
+      ){
+        backEndPlayer.health = backEndPlayer.health - backEndProjectiles[id].damage
+        delete backEndProjectiles[id]
         break
       }
 
