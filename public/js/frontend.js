@@ -17,6 +17,9 @@ const y = canvas.height / 2
 
 const frontEndPlayers = {}
 const frontEndProjectiles = {}
+const frontEndPortions = {}
+
+
 
 socket.on('updateProjectiles', (backEndProjectiles) => {
   for (const id in backEndProjectiles) {
@@ -26,7 +29,7 @@ socket.on('updateProjectiles', (backEndProjectiles) => {
       frontEndProjectiles[id] = new Projectile({
         x: backEndProjectile.x,
         y: backEndProjectile.y,
-        radius: 5,
+        radius: backEndProjectile.radius,
         color: frontEndPlayers[backEndProjectile.playerId]?.color,
         velocity: backEndProjectile.velocity
       })
@@ -43,18 +46,61 @@ socket.on('updateProjectiles', (backEndProjectiles) => {
   }
 })
 
+socket.on('updatePortions', (backEndPortions) => {
+  for (const id in backEndPortions) {
+    const backEndPortion = backEndPortions[id]
+
+    if (!frontEndPortions[id]) {
+      frontEndPortions[id] = new Portion({
+        x: backEndPortion.x,
+        y: backEndPortion.y,
+        effect: backEndPortion.effect
+      })
+    }
+
+  }
+
+  for (const id in frontEndPortions) {
+    if (!backEndPortions[id]) {
+      if (!backEndPortions[id]) {
+        delete frontEndPortions[id]
+      }
+    }
+  }
+})
+
 socket.on('updatePlayers', (backEndPlayers) => {
   for (const id in backEndPlayers) {
     const backEndPlayer = backEndPlayers[id]
+
+    if (frontEndPlayers[id]) {
+      frontEndPlayers[id].radius = backEndPlayer.radius
+      frontEndPlayers[id].updateEffect(backEndPlayer.effect, backEndPlayer.effectTime)
+      frontEndPlayers[id].speed = backEndPlayer.speed
+      frontEndPlayers[id].projectileRadius = backEndPlayer.projectileRadius
+      frontEndPlayers[id].projectileSpeed = backEndPlayer.projectileSpeed,
+      frontEndPlayers[id].health = backEndPlayer.health,
+      frontEndPlayers[id].healthBar = backEndPlayer.healthBar,
+      frontEndPlayers[id].projectileDamage = backEndPlayer.projectileDamage
+    }
+
 
     if (!frontEndPlayers[id]) {
       frontEndPlayers[id] = new Player({
         x: backEndPlayer.x,
         y: backEndPlayer.y,
-        radius: 10,
+        radius: backEndPlayer.radius,
         color: backEndPlayer.color,
-        username: backEndPlayer.username
+        speed: backEndPlayer.speed,
+        projectileRadius: backEndPlayer.projectileRadius,
+        projectileSpeed: backEndPlayer.projectileSpeed,
+        username: backEndPlayer.username,
+        health: backEndPlayer.health,
+        healthBar: backEndPlayer.healthBar,
+        projectileDamage: backEndPlayer.projectileDamage,
       })
+
+
 
       document.querySelector(
         '#playerLabels'
@@ -145,6 +191,11 @@ function animate() {
     frontEndPlayer.draw()
   }
 
+  for (const id in frontEndPortions) {
+    const frontEndPortion = frontEndPortions[id]
+    frontEndPortion.draw()
+  }
+
   for (const id in frontEndProjectiles) {
     const frontEndProjectile = frontEndProjectiles[id]
     frontEndProjectile.draw()
@@ -173,37 +224,58 @@ const keys = {
   }
 }
 
-const SPEED = 5
+
 const playerInputs = []
 let sequenceNumber = 0
 setInterval(() => {
+  // Used to detect the key presses
   if (keys.w.pressed) {
     sequenceNumber++
-    playerInputs.push({ sequenceNumber, dx: 0, dy: -SPEED })
-    // frontEndPlayers[socket.id].y -= SPEED
+    playerInputs.push({ sequenceNumber, dx: 0, dy: -frontEndPlayers[socket.id].speed })
+    //frontEndPlayers[socket.id].y -= frontEndPlayers[socket.id].speed
+
     socket.emit('keydown', { keycode: 'KeyW', sequenceNumber })
   }
 
   if (keys.a.pressed) {
     sequenceNumber++
-    playerInputs.push({ sequenceNumber, dx: -SPEED, dy: 0 })
-    // frontEndPlayers[socket.id].x -= SPEED
+    playerInputs.push({ sequenceNumber, dx: -frontEndPlayers[socket.id].speed, dy: 0 })
+    //frontEndPlayers[socket.id].x -= frontEndPlayers[socket.id].speed
+
     socket.emit('keydown', { keycode: 'KeyA', sequenceNumber })
   }
 
   if (keys.s.pressed) {
     sequenceNumber++
-    playerInputs.push({ sequenceNumber, dx: 0, dy: SPEED })
-    // frontEndPlayers[socket.id].y += SPEED
+    playerInputs.push({ sequenceNumber, dx: 0, dy: frontEndPlayers[socket.id].speed })
+    //frontEndPlayers[socket.id].y += frontEndPlayers[socket.id].speed
+
     socket.emit('keydown', { keycode: 'KeyS', sequenceNumber })
   }
 
   if (keys.d.pressed) {
     sequenceNumber++
-    playerInputs.push({ sequenceNumber, dx: SPEED, dy: 0 })
-    // frontEndPlayers[socket.id].x += SPEED
+    playerInputs.push({ sequenceNumber, dx: frontEndPlayers[socket.id].speed, dy: 0 })
+    //frontEndPlayers[socket.id].x += frontEndPlayers[socket.id].speed
+
     socket.emit('keydown', { keycode: 'KeyD', sequenceNumber })
   }
+
+  // Use to the portions effect to the client
+  try{
+    if (frontEndPlayers[socket.id].effect) {
+      const portionDiv = document.querySelector('#portionEffects')
+      if (frontEndPlayers[socket.id].effectTime < 500) {
+        portionDiv.innerHTML = ''
+      }
+      else {
+        portionDiv.innerHTML = `<div data-id="${socket.id}">${frontEndPlayers[socket.id].effect}: ${frontEndPlayers[socket.id].effectTime}</div>`
+      }
+  
+    }
+  }
+  catch(error){}
+  
 }, 15)
 
 window.addEventListener('keydown', (event) => {

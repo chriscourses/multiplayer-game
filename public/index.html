@@ -20,6 +20,7 @@
       }
     </style>
   </head>
+
   <body style="display: flex; align-items: center; justify-content: center">
     <div>
       <div
@@ -36,7 +37,28 @@
         <div style="margin-bottom: 8px">Leaderboard</div>
         <div id="playerLabels"></div>
       </div>
+      
+        <!-- Portions Effect Starts -->
+      <div
+        style="
+          position: absolute;
+          color: white;
+          padding: 8px;
+          font-family: sans-serif;
+          font-size: 14px;
+          user-select: none;
+          background: rgba(0, 0, 0, 0.5);
+          left: 70%;
+        "
+      >
+        <div style="margin-bottom: 8px">Portions Effects</div>
+        <div id="portionEffects"></div>
+      </div>
+      <!-- Portions Effect Ends -->
+
+      
       <canvas></canvas>
+
 
       <!-- username input -->
       <div
@@ -96,6 +118,7 @@
       referrerpolicy="no-referrer"
     ></script>
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="./js/classes/Portion.js"></script>
     <script src="./js/classes/Enemy.js"></script>
     <script src="./js/classes/Player.js"></script>
     <script src="./js/classes/Particle.js"></script>
