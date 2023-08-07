@@ -1,39 +1,29 @@
+var backendPortionsInfo = {}
+fetch('/portions')
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    backendPortionsInfo = data
+  })
+  .catch(error => {
+    console.error('Fetch Error:', error);
+  });
+
 class Portion {
     constructor({x, y, effect}){
         this.x = x
         this.y = y
         this.effect = effect
+        this.portionsInfo = backendPortionsInfo
     }
 
     draw(){
-        switch (this.effect) {
-            case 'GROW':
-              c.fillStyle = 'red';
-              break;
-            case 'FLASH':
-              c.fillStyle = 'yellow';
-              break;
-            case 'BIG_BULLETS':
-              c.fillStyle = 'orange';
-              break;
-            case 'SHRINK':
-              c.fillStyle = 'green';
-              break;
-            case 'FAST_BULLETS':
-              c.fillStyle = 'purple';
-              break;
-            case 'SLOW_BULLETS':
-              c.fillStyle = 'blue';
-              break;
-            case 'SLOW':
-              c.fillStyle = 'pink';
-              break;
-            default:
-              // Set a default color or do nothing if none of the cases match
-              c.fillStyle = 'white';
-              break;
-          }          
-        
-        c.fillRect(this.x, this.y, 15, 15)
+      
+      c.fillStyle = this.portionsInfo[this.effect].colour
+      c.fillRect(this.x, this.y, 15, 15)
     }
 }

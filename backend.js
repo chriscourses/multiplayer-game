@@ -1,3 +1,4 @@
+const EFFECT_INFO = require('./effects.js');
 const express = require('express')
 const app = express()
 
@@ -15,6 +16,10 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html')
 })
 
+app.get('/portions', (req, res) => {
+  res.json(EFFECT_INFO)
+})
+
 const backEndPlayers = {}
 const backEndProjectiles = {}
 const backEndPortions = {}
@@ -26,10 +31,13 @@ const RADIUS = 20
 const PROJECTILE_DAMAGE = 10
 const PROJECTILE_RADIUS = 10
 const PROJECTILE_SPEED = 30
-const PORTION_SPWAN_TIME = 1000
+const PORTION_SPWAN_TIME = 500
 const EFFECT_TIME = 10000
-//const EFFECTS = ['GROW', 'FLASH', 'BIG_BULLETS', 'SHRINK', 'FAST_BULLETS', 'SLOW_BULLETS', 'SLOW']
-const EFFECTS = ['GROW', 'SHRINK', 'FLASH', 'SLOW', 'BIG_BULLETS', 'FAST_BULLETS']
+
+const EFFECTS = []
+for(const effect in EFFECT_INFO){
+  EFFECTS.push(effect)
+}
 
 let projectileId = 0
 let count = 0
@@ -88,7 +96,6 @@ io.on('connection', (socket) => {
       height
     }
 
-    backEndPlayers[socket.id].radius = RADIUS
   })
 
   socket.on('disconnect', (reason) => {
@@ -167,27 +174,12 @@ setInterval((radius=PROJECTILE_RADIUS) => {
     // Restoring the portions effect
     if (backEndPlayer.effectTime < 0){
       
-      if(backEndPlayer.effect == 'GROW'){
-        backEndPlayer.radius = RADIUS
-      }
-      if(backEndPlayer.effect == 'SHRINK'){
-        backEndPlayer.radius = RADIUS
-      }
-      if(backEndPlayer.effect == 'FLASH'){
-        backEndPlayer.speed = SPEED
-      }
-      if(backEndPlayer.effect == 'SLOW'){
-        backEndPlayer.speed = SPEED
-      }
-      if(backEndPlayer.effect == 'BIG_BULLETS'){
-        backEndPlayer.projectileRadius = PROJECTILE_RADIUS
-        backEndPlayer.projectileSpeed = PROJECTILE_SPEED
-      }
-      if(backEndPlayer.effect == 'FAST_BULLETS'){
-        backEndPlayer.projectileRadius = PROJECTILE_RADIUS
-        backEndPlayer.projectileSpeed = PROJECTILE_SPEED
-      }
-
+      backEndPlayer.radius=RADIUS
+      backEndPlayer.speed=SPEED
+      backEndPlayer.projectileRadius=PROJECTILE_RADIUS
+      backEndPlayer.projectileSpeed=PROJECTILE_SPEED
+      backEndPlayer.healthBar=HEALTHBAR
+      backEndPlayer.projectileDamage=PROJECTILE_DAMAGE
       backEndPlayer.effect = ''
       backEndPlayer.effectTime = -1
     }
@@ -198,43 +190,22 @@ setInterval((radius=PROJECTILE_RADIUS) => {
 
       if (Math.abs(backEndPlayer.x - backEndPortion.x) < 15 && Math.abs(backEndPlayer.y - backEndPortion.y) < 15 && backEndPlayer.effect == ''){
         const effect = backEndPortion.effect
-        if(effect == 'GROW'){
-          backEndPlayer.radius = RADIUS + 10
-          backEndPlayer.effect = effect
-          backEndPlayer.effectTime = EFFECT_TIME
-          delete backEndPortions[id]
-        }
-        if(effect == 'SHRINK'){
-          backEndPlayer.radius = RADIUS - 10
-          backEndPlayer.effect = effect
-          backEndPlayer.effectTime = EFFECT_TIME
-          delete backEndPortions[id]
-        }
-        if(effect == 'FLASH'){
-          backEndPlayer.speed = SPEED + 5
-          backEndPlayer.effect = effect
-          backEndPlayer.effectTime = EFFECT_TIME
-          delete backEndPortions[id]
-        }
-        if(effect == 'SLOW'){
-          backEndPlayer.speed = SPEED - 5
-          backEndPlayer.effect = effect
-          backEndPlayer.effectTime = EFFECT_TIME
-          delete backEndPortions[id]
-        }
-        if(effect == 'BIG_BULLETS'){
-          backEndPlayer.projectileRadius = PROJECTILE_RADIUS + 5
-          backEndPlayer.projectileSpeed = PROJECTILE_SPEED - 10
-          backEndPlayer.effect = effect
-          backEndPlayer.effectTime = EFFECT_TIME
-          delete backEndPortions[id]
-        }
-        if(effect == 'FAST_BULLETS'){
-          backEndPlayer.projectileRadius = PROJECTILE_RADIUS - 5
-          backEndPlayer.projectileSpeed = PROJECTILE_SPEED + 10
-          backEndPlayer.effect = effect
-          backEndPlayer.effectTime = EFFECT_TIME
-          delete backEndPortions[id]
+        for (const info in EFFECT_INFO){
+          if(effect == info){
+            backEndPlayer.x= EFFECT_INFO[info].x??backEndPlayer.x
+            backEndPlayer.y= EFFECT_INFO[info].y??backEndPlayer.y
+            backEndPlayer.radius=EFFECT_INFO[info].radius??backEndPlayer.radius
+            backEndPlayer.speed=EFFECT_INFO[info].speed??backEndPlayer.speed
+            backEndPlayer.projectileRadius=EFFECT_INFO[info].projectileRadius??backEndPlayer.projectileRadius
+            backEndPlayer.projectileSpeed=EFFECT_INFO[info].projectileSpeed??backEndPlayer.projectileSpeed
+            backEndPlayer.health=EFFECT_INFO[info].health??backEndPlayer.health
+            backEndPlayer.healthBar=EFFECT_INFO[info].healthBar??backEndPlayer.healthBar
+            backEndPlayer.projectileDamage=EFFECT_INFO[info].projectileDamage??backEndPlayer.projectileDamage
+            backEndPlayer.effect = EFFECT_INFO[info].effect
+            backEndPlayer.effectTime = EFFECT_INFO[info].effectTime
+
+            delete backEndPortions[id]
+          }
         }
         
       }

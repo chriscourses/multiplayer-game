@@ -19,6 +19,8 @@ const frontEndPlayers = {}
 const frontEndProjectiles = {}
 const frontEndPortions = {}
 
+
+
 socket.on('updateProjectiles', (backEndProjectiles) => {
   for (const id in backEndProjectiles) {
     const backEndProjectile = backEndProjectiles[id]
@@ -260,16 +262,20 @@ setInterval(() => {
   }
 
   // Use to the portions effect to the client
-  if (frontEndPlayers[socket.id].effect) {
-    const portionDiv = document.querySelector('#portionEffects')
-    if (frontEndPlayers[socket.id].effectTime < 500) {
-      portionDiv.innerHTML = ''
+  try{
+    if (frontEndPlayers[socket.id].effect) {
+      const portionDiv = document.querySelector('#portionEffects')
+      if (frontEndPlayers[socket.id].effectTime < 500) {
+        portionDiv.innerHTML = ''
+      }
+      else {
+        portionDiv.innerHTML = `<div data-id="${socket.id}">${frontEndPlayers[socket.id].effect}: ${frontEndPlayers[socket.id].effectTime}</div>`
+      }
+  
     }
-    else {
-      portionDiv.innerHTML = `<div data-id="${socket.id}">${frontEndPlayers[socket.id].effect}: ${frontEndPlayers[socket.id].effectTime}</div>`
-    }
-
   }
+  catch(error){}
+  
 }, 15)
 
 window.addEventListener('keydown', (event) => {
